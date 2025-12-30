@@ -1,0 +1,96 @@
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  background: radial-gradient(circle at top, #3b1c5a, #0b0614);
+  color: #fff;
+}
+
+.auth-left {
+  flex: 1;
+  padding: 80px;
+}
+
+.brand h2 {
+  margin: 0;
+}
+
+.auth-left h1 span {
+  color: #a855f7;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 40px;
+  opacity: 0.9;
+}
+
+.auth-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-card {
+  width: 380px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  padding: 32px;
+  border-radius: 16px;
+}
+
+.auth-toggle {
+  display: flex;
+  margin: 20px 0;
+}
+
+.auth-toggle button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.auth-toggle .active {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  border-radius: 20px;
+}
+
+.auth-form input {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #0f0a1a;
+  border: 1px solid #2a1f3d;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.social-buttons button {
+  flex: 1;
+  background: #0f0a1a;
+  border: 1px solid #2a1f3d;
+  color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+}
