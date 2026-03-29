@@ -1,9 +1,12 @@
-import api from '@services/api.client';
+import { authClient } from '@services/api.client'
 
 export const authApi = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  register: (data) => api.post('/auth/register', data),
-  logout: () => api.post('/auth/logout'),
-  refreshToken: () => api.post('/auth/refresh-token'),
-  me: () => api.get('/auth/me'),
-};
+  login: (credentials) => authClient.post('/auth/login', credentials),
+  register: (data) => authClient.post('/auth/register', data),
+  logout: () => authClient.post('/auth/logout'),
+  refreshToken: () => authClient.post('/auth/refresh-token'),
+  me: () => authClient.get('/auth/me'),
+}
+
+export const loginUser = (credentials) => authApi.login(credentials)
+export const logoutUser = () => authApi.logout()

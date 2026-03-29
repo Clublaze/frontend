@@ -5,36 +5,43 @@ export const apiClient = axios.create({
   baseURL: config.apiBaseUrl,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true, // ← THIS is the only thing needed for cookies
-  // withCredentials: true tells the browser to:
-  // 1. Send cookies automatically with every request
-  // 2. Accept cookies from the backend in responses
-  // The token never touches your JavaScript code at all
+  withCredentials: true,
 })
 
-// ── RESPONSE INTERCEPTOR ─────────────────────────────────────────────
-apiClient.interceptors.response.use(
-  (response) => response.data,
+export const authClient = axios.create({
+  baseURL: config.authBaseUrl,
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
+})
 
-  (error) => {
-    const status = error.response?.status
+const addResponseInterceptor = (instance) => {
+  instance.interceptors.response.use(
+    (response) => response.data,
 
-    if (status === 401) {
-      // Cookie expired or invalid — redirect to login
-      // No localStorage to clear since token was never stored there
-      window.location.href = '/login'
-      return Promise.reject({ message: 'Session expired. Please log in again.' })
+    (error) => {
+      const status = error.response?.status
+
+      if (status === 401) {
+        window.location.href = '/login'
+        return Promise.reject({ message: 'Session expired. Please log in again.' })
+      }
+
+      if (status === 403) {
+        return Promise.reject({
+          type: 'FORBIDDEN',
+          message: 'You do not have permission to perform this action.',
+        })
+      }
+
+      return Promise.reject(
+        error.response?.data ?? { message: 'Something went wrong. Please try again.' }
+      )
     }
+  )
+}
 
-    if (status === 403) {
-      return Promise.reject({
-        type: 'FORBIDDEN',
-        message: 'You do not have permission to perform this action.',
-      })
-    }
+addResponseInterceptor(apiClient)
+addResponseInterceptor(authClient)
 
-    return Promise.reject(
-      error.response?.data ?? { message: 'Something went wrong. Please try again.' }
-    )
-  }
-)
+export default apiClient

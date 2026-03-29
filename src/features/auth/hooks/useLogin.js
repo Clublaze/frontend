@@ -1,4 +1,3 @@
-// features/auth/hooks/useLogin.js
 import { useMutation } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 import { setAuth } from '@store/authSlice'

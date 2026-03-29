@@ -1,4 +1,3 @@
-// features/auth/hooks/useLogout.js
 import { useMutation } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -12,17 +11,10 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: () => logoutUser(),
-    onSuccess: () => {
-      dispatch(clearAuth())              // wipe Redux + localStorage
-      queryClient.clear()               // wipe all TanStack Query cache
-      navigate('/login')
-    },
     onSettled: () => {
-      // Even if the API call fails, clear client state
-      // so user isn't stuck in a broken logged-in state
       dispatch(clearAuth())
       queryClient.clear()
       navigate('/login')
     },
   })
-}
+}
