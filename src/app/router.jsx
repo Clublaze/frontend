@@ -1,6 +1,9 @@
+
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { selectIsLoggedIn } from '@store/authSlice'
+import LoginPage from '../features/auth/pages/LoginPage'
+import { SignupPage } from '../features/auth/pages/SignupPage'
 
 function ProtectedRoute({ children }) {
   const isLoggedIn = useSelector(selectIsLoggedIn)
@@ -11,16 +14,17 @@ function ProtectedRoute({ children }) {
 function Page({ name }) {
   return (
     <div style={{ padding: 32, fontFamily: 'Arial' }}>
-      <h2 style={{ color: '#1e3a8a' }}>{name}</h2>
-      <p style={{ color: '#64748b' }}>This page is not built yet.</p>
+      <h2 style={{ color: 'var(--color-primary-900)' }}>{name}</h2>
+      <p style={{ color: 'var(--color-neutral-400)' }}>This page is not built yet.</p>
     </div>
   )
 }
 
+
 export const router = createBrowserRouter([
   // Public routes 
-  { path: '/login',    element: <Page name="Login Page" /> },
-  { path: '/register', element: <Page name="Register Page" /> },
+  { path: '/login',    element: <LoginPage /> },
+  { path: '/register', element: <SignupPage /> },
 
   // Authenticated routes 
   {
