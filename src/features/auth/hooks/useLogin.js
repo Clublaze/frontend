@@ -1,27 +1,20 @@
-import { useMutation } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
-import { setAuth } from '@store/authSlice'
-import { loginUser } from '../auth.api.js'
+import { useMutation } from '@tanstack/react-query';
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import { getApiErrorMessage, login } from '@auth/api/auth.api';
+import { setCredentials } from '@auth/authSlice';
 
 export function useLogin() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   return useMutation({
-    mutationFn: (credentials) => loginUser(credentials),
-
-    onSuccess: (data) => {
-      // Backend set the httpOnly cookie automatically in the response
-      // data contains the user info your backend returns in the body
-      // e.g. { user: {...}, canonicalRole: 'CLUB_LEAD', universityId: '...' }
-      dispatch(setAuth({
-        user:           data.user,
-        canonicalRole:  data.canonicalRole,
-        scopeId:        data.scopeId,
-        universityId:   data.universityId,
-        universityName: data.universityName,
-        sessionId:      data.sessionId,
-      }))
-      // No JWT decoding needed — backend sends user info directly in response body
+    mutationFn: login,
+    onSuccess: ({ accessToken }) => {
+      dispatch(setCredentials({ accessToken, user: null }));
+      toast.success('Login successful.');
     },
-  })
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error, 'Unable to sign in. Please try again.'));
+    },
+  });
 }

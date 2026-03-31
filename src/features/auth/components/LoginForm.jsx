@@ -1,68 +1,61 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { z } from 'zod';
+import Button from '@ds/components/Button';
+import Input from '@ds/components/Input';
+import { useLogin } from '@auth/hooks/useLogin';
 
-export default function LoginForm() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
+const loginSchema = z.object({
+  email: z.string().email('Enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+function LoginForm() {
+  const loginMutation = useLogin();
+  const {
+    formState: { errors },
+    handleSubmit,
+    register,
+  } = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    resolver: zodResolver(loginSchema),
   });
 
   return (
-    <form
-      className="w-full max-w-md p-8 rounded-2xl shadow-xl
-      bg-[var(--color-neutral-900)]
-      border-2 border-[var(--color-border)]"
-    >
-      <h2 className="text-2xl font-bold mb-6 text-center text-[var(--color-text-primary)]">
-        Sign In
-      </h2>
-
-      {/* Email */}
-      <input
-        type="email"
-        placeholder="Email"
-        className="w-full mb-4 px-4 py-3 rounded-lg
-        bg-[var(--color-neutral-800)]
-        border-2 border-[var(--color-border)]
-        text-[var(--color-text-primary)] font-medium
-        placeholder-[var(--color-text-muted)]
-        focus:outline-none focus:ring-2
-        focus:ring-[var(--color-primary-500)]"
+    <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit((values) => loginMutation.mutate(values))}>
+      <Input
+        autoComplete="email"
+        error={errors.email?.message}
+        label="Username or Email"
+        placeholder="you@university.edu"
+        {...register('email')}
       />
 
-      {/* Password */}
-      <input
+      <Input
+        autoComplete="current-password"
+        error={errors.password?.message}
+        label="Password"
+        placeholder="Enter your password"
         type="password"
-        placeholder="Password"
-        className="w-full mb-6 px-4 py-3 rounded-lg
-        bg-[var(--color-neutral-800)]
-        border-2 border-[var(--color-border)]
-        text-[var(--color-text-primary)] font-medium
-        placeholder-[var(--color-text-muted)]
-        focus:outline-none focus:ring-2
-        focus:ring-[var(--color-primary-500)]"
+        {...register('password')}
       />
 
-      {/* Button */}
-      <button
-        className="w-full py-3 rounded-lg font-bold text-white
-        bg-[var(--color-primary-500)]
-        hover:bg-[var(--color-primary-600)]
-        transition shadow-md"
-      >
+      <Button className="w-full" isLoading={loginMutation.isPending} size="lg" type="submit">
         Sign In
-      </button>
+      </Button>
 
-      {/* Signup Link */}
-      <div className="mt-6 text-center">
-        <span className="text-[var(--color-text-muted)] font-medium">Don't have an account? </span>
-        <Link
-          to="/register"
-          className="text-[var(--color-primary-500)] hover:underline font-bold"
-        >
+      <p className="px-2 text-center text-sm leading-6 text-[var(--color-text-secondary)]">
+        Don&apos;t have an account?{' '}
+        <Link className="font-semibold text-[var(--color-brand)]" to="/signup">
           Sign up
         </Link>
-      </div>
+      </p>
     </form>
   );
 }
+
+export default LoginForm;

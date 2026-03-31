@@ -1,12 +1,20 @@
-import LoginForm from "../components/LoginForm";
+import LoginForm from '@auth/components/LoginForm';
 
-export default function LoginPage() {
+function LoginPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: 'var(--color-neutral-900)' }}
-    >
-      <LoginForm />
-    </div>
+    <section className="card-surface auth-card">
+      <div className="text-center">
+        <h2 className="auth-heading font-semibold tracking-tight">Welcome back</h2>
+        <p className="auth-body-copy mt-3 text-[var(--color-text-secondary)]">
+          Sign in to your UniHub account
+        </p>
+      </div>
+
+      <div className="mt-6 sm:mt-8">
+        <LoginForm />
+      </div>
+    </section>
   );
 }
+
+export default LoginPage;

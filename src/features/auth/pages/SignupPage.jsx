@@ -1,12 +1,20 @@
-import SignupForm from "../components/SignupForm";
+import SignupForm from '@auth/components/SignupForm';
 
-export function SignupPage() {
+function SignupPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: 'var(--color-neutral-900)' }}
-    >
-      <SignupForm />
-    </div>
+    <section className="card-surface auth-card">
+      <div className="text-center">
+        <h2 className="auth-heading font-semibold tracking-tight">Create an account</h2>
+        <p className="auth-body-copy mt-3 text-[var(--color-text-secondary)]">
+          Join UniHub to get started
+        </p>
+      </div>
+
+      <div className="mt-6 sm:mt-8">
+        <SignupForm />
+      </div>
+    </section>
   );
 }
+
+export default SignupPage;

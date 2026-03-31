@@ -17,6 +17,8 @@
   body {
     margin: 0;
     min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
     background:
       radial-gradient(circle at top center, rgba(33, 199, 183, 0.12) 0, transparent 24%),
       linear-gradient(180deg, var(--color-background) 0%, var(--color-surface-dark) 100%);
@@ -35,8 +37,15 @@
     font: inherit;
   }
 
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
   #root {
     min-height: 100vh;
+    min-height: 100dvh;
   }
 
   ::selection {
@@ -57,5 +66,19 @@
     background: var(--color-surface-soft);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
+  }
+
+  .auth-card {
+    width: 100%;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+  }
+
+  .auth-heading {
+    font-size: clamp(1.95rem, 5vw, 2.5rem);
+    line-height: 1.05;
+  }
+
+  .auth-body-copy {
+    font-size: clamp(0.95rem, 2.8vw, 1rem);
   }
 }
