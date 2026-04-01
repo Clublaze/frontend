@@ -30,7 +30,7 @@ function LoginForm() {
       <Input
         autoComplete="email"
         error={errors.email?.message}
-        label="Username or Email"
+        label="Email"
         placeholder="you@university.edu"
         {...register('email')}
       />

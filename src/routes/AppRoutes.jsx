@@ -3,10 +3,20 @@ import AuthLayout from '@/layouts/AuthLayout';
 import LoginPage from '@auth/pages/LoginPage';
 import SignupPage from '@auth/pages/SignupPage';
 import VerifyEmailPage from '@auth/pages/VerifyEmailPage';
+import ProtectedRoute from '@/routes/ProtectedRoute';
 
 function AppRoutes() {
   return (
     <Routes>
+      <Route
+        element={
+          <ProtectedRoute>
+            <div>Dashboard</div>
+          </ProtectedRoute>
+        }
+        path="/dashboard"
+      />
+
       <Route element={<AuthLayout />}>
         <Route element={<Navigate replace to="/login" />} path="/" />
         <Route element={<LoginPage />} path="/login" />

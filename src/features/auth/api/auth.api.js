@@ -20,6 +20,11 @@ export async function verifyEmail(payload) {
   return response.data;
 }
 
+export async function getCurrentUser() {
+  const response = await api.get('/auth/me');
+  return response.data.data;
+}
+
 export function getApiErrorMessage(error, fallbackMessage) {
   return error?.response?.data?.message || fallbackMessage;
 }
