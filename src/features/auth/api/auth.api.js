@@ -14,7 +14,7 @@ export async function signup({ accountType, ...payload }) {
   const response = await api.post(endpoint, payload);
   return response.data;
 }
-//to verify email
+//to verify
 export async function verifyEmail(payload) {
   const response = await api.post('/auth/verify-email', payload);
   return response.data;
