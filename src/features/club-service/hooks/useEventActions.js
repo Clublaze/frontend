@@ -1,6 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { markEventComplete, resubmitEvent, submitEvent } from '@club/api/events.api';
+import {
+  closeEvent,
+  markEventComplete,
+  resubmitEvent,
+  submitEvent,
+  updateEvent,
+} from '@club/api/events.api';
 
 function invalidateEvents(queryClient) {
   queryClient.invalidateQueries({ queryKey: ['club-service', 'events'] });
@@ -48,6 +54,38 @@ export function useMarkEventComplete() {
     },
     onError: (error) => {
       toast.error(error?.response?.data?.message ?? 'Could not mark event as complete.');
+    },
+  });
+}
+
+export function useUpdateEvent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ eventId, payload }) => updateEvent(eventId, payload),
+    onSuccess: (_, { eventId }) => {
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events'] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events', 'detail', eventId] });
+      toast.success('Event updated successfully.');
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message ?? 'Could not update event.');
+    },
+  });
+}
+
+export function useCloseEvent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (eventId) => closeEvent(eventId),
+    onSuccess: (_, eventId) => {
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events'] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events', 'detail', eventId] });
+      toast.success('Event closed successfully.');
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message ?? 'Could not close event.');
     },
   });
 }

@@ -23,7 +23,7 @@ import {
   mainNavigationItems,
 } from '@dashboard/config/navigation';
 import { formatCanonicalRole } from '@dashboard/utils/dashboardAccess';
-import { usePermission } from '@hooks/usePermission';
+import { useIsAdmin, usePermission } from '@hooks/usePermission';
 import {
   getUserDisplayName,
   getUserInitials,
@@ -88,8 +88,12 @@ function SidebarLink({ collapsed, icon, label, onNavigate, to }) {
   );
 }
 
-function SidebarSection({ can, collapsed, items, onNavigate, title }) {
-  const visibleItems = items.filter((item) => item.permission === null || can(item.permission));
+function SidebarSection({ can, collapsed, isAdmin, items, onNavigate, title }) {
+  const visibleItems = items.filter((item) => {
+    if (item.adminOnly) return isAdmin;
+    if (item.permission === null) return true;
+    return can(item.permission);
+  });
 
   return (
     <section>
@@ -128,6 +132,7 @@ function SidebarShell({
         ? 'Faculty Member'
         : 'Campus Member';
   const { can } = usePermission(dashboard?.roles ?? []);
+  const isAdmin = useIsAdmin();
 
   return (
     <div
@@ -186,6 +191,7 @@ function SidebarShell({
           <SidebarSection
             can={can}
             collapsed={collapsed}
+            isAdmin={isAdmin}
             items={mainNavigationItems}
             onNavigate={onNavigate}
             title="Main Menu"
@@ -193,6 +199,7 @@ function SidebarShell({
           <SidebarSection
             can={can}
             collapsed={collapsed}
+            isAdmin={isAdmin}
             items={accountNavigationItems}
             onNavigate={onNavigate}
             title="Account"

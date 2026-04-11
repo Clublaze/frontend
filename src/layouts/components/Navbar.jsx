@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bell, ChevronDown, LogOut, Menu, Settings, User } from 'lucide-react';
+import { Bell, LogOut, Menu, Settings, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import ListRow from '@ds/components/ListRow';
-import { formatCanonicalRole } from '@dashboard/utils/dashboardAccess';
 import {
   getGreetingLabel,
   getUserDisplayName,
@@ -16,11 +14,8 @@ function Navbar({ dashboard, isDesktop, onMenuToggle }) {
   const user = dashboard?.user;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
-  const [activeViewRole, setActiveViewRole] = useState(null);
   const dropdownRef = useRef(null);
   const notificationsRef = useRef(null);
-  const roleDropdownRef = useRef(null);
   const notifications = useNotifications(dashboard);
   const notificationCount = Math.min(notifications.count, 9);
 
@@ -33,55 +28,11 @@ function Navbar({ dashboard, isDesktop, onMenuToggle }) {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
         setNotificationsOpen(false);
       }
-
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target)) {
-        setRoleDropdownOpen(false);
-      }
     }
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const ADMIN_TYPES = ['UNIVERSITY_ADMIN', 'ADMIN', 'SUPER_ADMIN'];
-  const isAdmin = ADMIN_TYPES.includes(user?.userType);
-
-  const ROLE_PRIORITY = [
-    'DEAN', 'HOD', 'FACULTY_ADVISOR', 'PRESIDENT', 'VICE_PRESIDENT',
-    'SECRETARY', 'CLUB_LEAD', 'CO_LEAD', 'COORDINATOR',
-  ];
-
-  const allActiveRoles = (dashboard?.roles ?? [])
-    .filter((role) => role.status !== 'REMOVED');
-
-  const currentRoleLabel = (() => {
-    if (isAdmin) return 'Admin';
-    if (activeViewRole) return formatCanonicalRole(activeViewRole);
-    const match = ROLE_PRIORITY.find((priorityRole) =>
-      allActiveRoles.some((role) => role.canonicalRole === priorityRole)
-    );
-    if (match) return formatCanonicalRole(match);
-    return user?.userType === 'FACULTY' ? 'Faculty' : 'Student';
-  })();
-
-  const showRoleToast = (label) => {
-    toast.info(
-      <div>
-        <p style={{ fontWeight: 600 }}>Role switched</p>
-        <p style={{ fontSize: '0.875rem', opacity: 0.7 }}>Now viewing as {label}</p>
-      </div>,
-      {
-        position: 'bottom-right',
-        autoClose: 2000,
-        style: {
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          color: 'var(--color-text-primary)',
-        },
-      },
-    );
-  };
 
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface-dark)_80%,var(--color-background)_20%)]">
@@ -115,73 +66,6 @@ function Navbar({ dashboard, isDesktop, onMenuToggle }) {
         </div>
 
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="relative" ref={roleDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setRoleDropdownOpen((current) => !current)}
-              className="inline-flex items-center gap-1.5 rounded-[var(--radius-full)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface)]"
-            >
-              {currentRoleLabel}
-              <ChevronDown className="h-3.5 w-3.5 text-[var(--color-text-secondary)]" />
-            </button>
-
-            {roleDropdownOpen && (
-              <div className="absolute left-0 top-10 z-50 min-w-[160px] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] py-1 shadow-[var(--shadow-card)]">
-                <div className="border-b border-[var(--color-border)] px-4 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-                    Switch view
-                  </p>
-                </div>
-
-                {isAdmin && (
-                  <button
-                    type="button"
-                    className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-text-primary)]"
-                    onClick={() => {
-                      setActiveViewRole('ADMIN');
-                      setRoleDropdownOpen(false);
-                      showRoleToast('Admin');
-                    }}
-                  >
-                    Admin
-                  </button>
-                )}
-
-                {allActiveRoles.map((role) => (
-                  <button
-                    key={role._id}
-                    type="button"
-                    className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-text-primary)]"
-                    onClick={() => {
-                      setActiveViewRole(role.canonicalRole);
-                      setRoleDropdownOpen(false);
-                      const label = formatCanonicalRole(role.canonicalRole);
-                      showRoleToast(label);
-                    }}
-                  >
-                    {formatCanonicalRole(role.canonicalRole)}
-                    <span className="ml-2 text-xs text-[var(--color-text-secondary)]">
-                      {role.scopeType}
-                    </span>
-                  </button>
-                ))}
-
-                <button
-                  type="button"
-                  className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-text-primary)]"
-                  onClick={() => {
-                    setActiveViewRole(null);
-                    setRoleDropdownOpen(false);
-                    const label = user?.userType === 'FACULTY' ? 'Faculty' : 'Student';
-                    showRoleToast(label);
-                  }}
-                >
-                  {user?.userType === 'FACULTY' ? 'Faculty' : 'Student'}
-                </button>
-              </div>
-            )}
-          </div>
-
           <div className="relative" ref={notificationsRef}>
             <button
               className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"

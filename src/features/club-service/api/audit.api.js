@@ -25,3 +25,12 @@ export async function getAuditFeedPaginated({ page = 1, limit = 20, action, enti
     totalPages: result?.totalPages ?? 1,
   };
 }
+
+export async function exportAuditCsv({ from, to }) {
+  const response = await clubApi.get('/audit/export', {
+    params: { from, to },
+    responseType: 'blob',
+  });
+
+  return response.data;
+}

@@ -1,8 +1,10 @@
-import { Users } from 'lucide-react';
+ï»¿import { Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@ds/components/Avatar';
 import Button from '@ds/components/Button';
 
 function ClubCard({ club, meta, membershipStatus, onJoin, isJoining, orgTree }) {
+  const navigate = useNavigate();
   const societyName = (() => {
     if (!orgTree || !club.parentId) return null;
     const parent = orgTree.byId?.get(String(club.parentId));
@@ -18,7 +20,7 @@ function ClubCard({ club, meta, membershipStatus, onJoin, isJoining, orgTree }) 
   })();
 
   const getJoinLabel = () => {
-    if (membershipStatus === 'ACTIVE') return 'Joined ?';
+    if (membershipStatus === 'ACTIVE') return 'Joined';
     if (membershipStatus === 'PENDING') return 'Applied';
     if (membershipStatus === 'REJECTED') return 'Apply Again';
     return 'Join Club';
@@ -33,14 +35,20 @@ function ClubCard({ club, meta, membershipStatus, onJoin, isJoining, orgTree }) 
           <div className="min-w-0">
             <h3 className="text-base font-semibold text-[var(--color-text-primary)]">{club.name}</h3>
             <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-              {club.type}{club.code ? ` · ${club.code}` : ''}
+              {club.type}{club.code ? ` Â· ${club.code}` : ''}
             </p>
           </div>
-          {meta && (
+          {meta ? (
             <span className="rounded-full border border-[var(--color-border)] px-3 py-1 text-xs font-semibold text-[var(--color-text-secondary)]">
               {meta}
             </span>
-          )}
+          ) : null}
+        </div>
+
+        <div className="mt-4">
+          <Button onClick={() => navigate(`/dashboard/clubs/${club._id}`)} size="sm" variant="ghost">
+            View Profile
+          </Button>
         </div>
       </article>
     );
@@ -53,43 +61,46 @@ function ClubCard({ club, meta, membershipStatus, onJoin, isJoining, orgTree }) 
         <div className="min-w-0">
           <h3 className="text-base font-semibold text-[var(--color-text-primary)]">{club.name}</h3>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            {club.memberCount ?? (meta ?? '—')} members
+            {club.memberCount ?? meta ?? '-'} members
           </p>
         </div>
       </div>
 
-      {(societyName || schoolName) && (
-        <div
-          className="space-y-0.5 border-l-2 pl-3"
-          style={{ borderColor: 'var(--color-brand)' }}
-        >
-          {societyName && (
+      {(societyName || schoolName) ? (
+        <div className="space-y-0.5 border-l-2 pl-3" style={{ borderColor: 'var(--color-brand)' }}>
+          {societyName ? (
             <p className="text-sm font-medium" style={{ color: 'var(--color-brand)' }}>
               {societyName}
             </p>
-          )}
-          {schoolName && (
-            <p className="text-sm text-[var(--color-text-secondary)]">{schoolName}</p>
-          )}
+          ) : null}
+          {schoolName ? <p className="text-sm text-[var(--color-text-secondary)]">{schoolName}</p> : null}
         </div>
-      )}
+      ) : null}
 
-      {club.description && (
+      {club.description ? (
         <p className="line-clamp-2 text-sm leading-6 text-[var(--color-text-secondary)]">
           {club.description}
         </p>
-      )}
+      ) : null}
 
-      <Button
-        className="mt-auto w-full gap-2"
-        disabled={joinDisabled}
-        isLoading={isJoining && !joinDisabled}
-        variant={joinDisabled ? 'secondary' : 'primary'}
-        onClick={() => { if (!joinDisabled) onJoin(club._id); }}
-      >
-        <Users className="h-4 w-4" />
-        {isJoining ? 'Submitting...' : getJoinLabel()}
-      </Button>
+      <div className="mt-auto space-y-3">
+        <Button
+          className="w-full gap-2"
+          disabled={joinDisabled}
+          isLoading={isJoining && !joinDisabled}
+          onClick={() => {
+            if (!joinDisabled) onJoin(club._id);
+          }}
+          variant={joinDisabled ? 'secondary' : 'primary'}
+        >
+          <Users className="h-4 w-4" />
+          {isJoining ? 'Submitting...' : getJoinLabel()}
+        </Button>
+
+        <Button className="w-full" onClick={() => navigate(`/dashboard/clubs/${club._id}`)} variant="ghost">
+          View Profile
+        </Button>
+      </div>
     </article>
   );
 }

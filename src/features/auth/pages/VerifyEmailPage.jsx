@@ -1,14 +1,19 @@
 import { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Button from '@ds/components/Button';
+import { useResendVerification } from '@auth/hooks/useResendVerification';
+import { selectUser } from '@store/authSlice';
 import { useVerifyEmail } from '@auth/hooks/useVerifyEmail';
 
 function VerifyEmailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const user = useSelector(selectUser);
   const tokenFromUrl = searchParams.get('token') ?? '';
   const emailHint = searchParams.get('email');
   const verifyEmailMutation = useVerifyEmail();
+  const resendVerification = useResendVerification();
   const hasAutoSubmitted = useRef(false);
 
   useEffect(() => {
@@ -51,6 +56,18 @@ function VerifyEmailPage() {
             ? `A verification link was sent to ${emailHint}. Please check your inbox and verify your email.`
             : 'A verification link was sent to your email. Please check your inbox and verify your email.'}
         </p>
+        {user ? (
+          <div className="mt-6">
+            <Button
+              isLoading={resendVerification.isPending}
+              onClick={() => resendVerification.mutate()}
+              type="button"
+              variant="secondary"
+            >
+              Resend verification email
+            </Button>
+          </div>
+        ) : null}
       </section>
     );
   }

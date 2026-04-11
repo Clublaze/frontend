@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import Button from '@ds/components/Button';
 import StatusBadge from '@ds/components/StatusBadge';
 import BudgetForm from '@club/components/BudgetForm';
+import EventEditForm from '@club/components/EventEditForm';
 import EcrForm from '@club/components/EcrForm';
 import SettlementForm from '@club/components/SettlementForm';
 import {
+  useCloseEvent,
   useMarkEventComplete,
   useResubmitEvent,
   useSubmitEvent,
@@ -32,9 +34,11 @@ function CategoryBadge({ category }) {
 
 function EventManagementCard({ event }) {
   const [budgetOpen, setBudgetOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [ecrOpen, setEcrOpen] = useState(false);
   const [settlementOpen, setSettlementOpen] = useState(false);
 
+  const closeEvent = useCloseEvent();
   const submitEvent = useSubmitEvent();
   const resubmitEvent = useResubmitEvent();
   const markComplete = useMarkEventComplete();
@@ -103,6 +107,9 @@ function EventManagementCard({ event }) {
         </Link>
         {event.status === 'DRAFT' ? (
           <>
+            <Button size="sm" variant="secondary" onClick={() => setEditOpen(true)}>
+              Edit
+            </Button>
             <Button size="sm" variant="secondary" onClick={() => setBudgetOpen(true)}>
               {budget ? 'Edit Budget' : 'Submit Budget'}
             </Button>
@@ -139,17 +146,35 @@ function EventManagementCard({ event }) {
         ) : null}
 
         {event.status === 'ECR_PENDING' ? (
-          <>
-            <Button size="sm" variant="secondary" onClick={() => setEcrOpen(true)}>
-              Submit ECR
-            </Button>
-            <Button size="sm" variant="secondary" onClick={() => setSettlementOpen(true)}>
-              Submit Settlement
-            </Button>
-          </>
+          <div className="w-full space-y-2">
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="secondary" onClick={() => setEcrOpen(true)}>
+                Submit ECR
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => setSettlementOpen(true)}>
+                Submit Settlement
+              </Button>
+              <Button
+                isLoading={closeEvent.isPending}
+                onClick={() => closeEvent.mutate(event._id)}
+                size="sm"
+                style={{ background: 'var(--color-success)', color: 'var(--color-text-on-brand)' }}
+              >
+                Close Event
+              </Button>
+            </div>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              Close event only after ECR and settlement are both approved.
+            </p>
+          </div>
         ) : null}
       </div>
 
+      <EventEditForm
+        event={event}
+        onClose={() => setEditOpen(false)}
+        open={editOpen}
+      />
       <BudgetForm
         open={budgetOpen}
         onClose={() => setBudgetOpen(false)}

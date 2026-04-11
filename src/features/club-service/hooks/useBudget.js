@@ -51,6 +51,8 @@ export function useApproveBudget() {
     mutationFn: (eventId) => approveBudget(eventId),
     onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({ queryKey: ['club-service', 'budget', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events'] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events', 'detail', eventId] });
       toast.success('Budget approved.');
     },
     onError: (error) => {
@@ -66,6 +68,8 @@ export function useRejectBudget() {
     mutationFn: ({ eventId, reason }) => rejectBudget(eventId, reason),
     onSuccess: (_, { eventId }) => {
       queryClient.invalidateQueries({ queryKey: ['club-service', 'budget', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events'] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events', 'detail', eventId] });
       toast.success('Budget rejected.');
     },
     onError: (error) => {
@@ -96,6 +100,8 @@ export function useApproveSettlement() {
     mutationFn: (eventId) => approveSettlement(eventId),
     onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({ queryKey: ['club-service', 'settlement', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events'] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events', 'detail', eventId] });
       toast.success('Settlement approved.');
     },
     onError: (error) => {

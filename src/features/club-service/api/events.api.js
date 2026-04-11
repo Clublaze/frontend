@@ -35,3 +35,8 @@ export async function updateEvent(eventId, payload) {
   const response = await clubApi.patch(`/events/${eventId}`, payload);
   return response.data.data;
 }
+
+export async function closeEvent(eventId) {
+  const response = await clubApi.post(`/events/${eventId}/close`);
+  return response.data.data;
+}

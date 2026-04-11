@@ -9,6 +9,7 @@ export const mainNavigationItems = [
   { label: 'Audit Panel', icon: 'audit',       to: '/dashboard/audit',        permission: 'VIEW_APPROVALS' },
   { label: 'Governance',  icon: 'governance',  to: '/dashboard/governance',   permission: 'ASSIGN_ROLES' },
   { label: 'Leaderboard', icon: 'leaderboard', to: '/dashboard/leaderboard',  permission: null },
+  { label: 'User Management', icon: 'profile', to: '/dashboard/admin/users', permission: null, adminOnly: true },
 ];
 
 export const accountNavigationItems = [

@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import Button from '@ds/components/Button';
+
 function SocietyCard({ society, childClubs = [], schoolName = '' }) {
   return (
     <article className="card-surface overflow-hidden">
@@ -36,6 +39,12 @@ function SocietyCard({ society, childClubs = [], schoolName = '' }) {
             </div>
           </div>
         ) : null}
+
+        <div className="mt-5">
+          <Link to={`/dashboard/societies/${society._id}`}>
+            <Button size="sm" variant="ghost">View Profile</Button>
+          </Link>
+        </div>
       </div>
     </article>
   );

@@ -60,6 +60,12 @@ function LoginForm() {
         {errors.password ? <p className="text-sm text-[var(--color-danger)]">{errors.password.message}</p> : null}
       </label>
 
+      <div className="flex justify-end">
+        <Link className="text-sm font-medium text-[var(--color-brand)]" to="/forgot-password">
+          Forgot password?
+        </Link>
+      </div>
+
       <Button className="w-full" isLoading={loginMutation.isPending} size="lg" type="submit">
         Sign In
       </Button>

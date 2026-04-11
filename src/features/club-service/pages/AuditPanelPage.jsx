@@ -8,10 +8,12 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import Loader from '@ds/components/Loader';
 import EmptyState from '@ds/components/EmptyState';
 import PageHeader from '@ds/components/PageHeader';
 import Button from '@ds/components/Button';
+import { exportAuditCsv } from '@club/api/audit.api';
 import { useAuditPanel } from '@club/hooks/useAuditPanel';
 import { useIsAdmin, usePermission } from '@hooks/usePermission';
 import {
@@ -38,6 +40,9 @@ function AuditPanelPage() {
   const [page, setPage] = useState(1);
   const [allLogs, setAllLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   const { data, isLoading, isFetching } = useAuditPanel({ action: activeFilter, page });
 
@@ -52,6 +57,30 @@ function AuditPanelPage() {
     setActiveFilter(value);
     setPage(1);
     setAllLogs([]);
+  };
+
+  const handleExport = async () => {
+    if (!fromDate || !toDate) {
+      toast.error('Select both from and to dates');
+      return;
+    }
+
+    setExporting(true);
+
+    try {
+      const blob = await exportAuditCsv({ from: fromDate, to: toDate });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `audit-${fromDate}-to-${toDate}.csv`;
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Audit log exported successfully.');
+    } catch {
+      toast.error('Export failed. Try again.');
+    } finally {
+      setExporting(false);
+    }
   };
 
   if (!can('VIEW_AUDIT') && !can('VIEW_APPROVALS') && !isAdmin) {
@@ -102,6 +131,34 @@ function AuditPanelPage() {
           ))}
         </div>
       </div>
+
+      {isAdmin || can('VIEW_AUDIT') ? (
+        <section className="card-surface p-5">
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-[var(--color-text-primary)]">From</span>
+              <input
+                className="min-h-10 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-2 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-brand)]"
+                onChange={(event) => setFromDate(event.target.value)}
+                type="date"
+                value={fromDate}
+              />
+            </label>
+            <label className="block space-y-2">
+              <span className="text-sm font-medium text-[var(--color-text-primary)]">To</span>
+              <input
+                className="min-h-10 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-2 text-sm text-[var(--color-text-primary)] outline-none focus:border-[var(--color-brand)]"
+                onChange={(event) => setToDate(event.target.value)}
+                type="date"
+                value={toDate}
+              />
+            </label>
+            <Button isLoading={exporting} onClick={handleExport} size="sm" variant="secondary">
+              Export CSV
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {isLoading && page === 1 ? (
         <div className="flex justify-center py-12"><Loader size="lg" /></div>
@@ -170,7 +227,7 @@ function AuditPanelPage() {
 
                     <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
                       <strong className="font-medium text-[var(--color-text-primary)]">{actor}</strong>
-                      {entity ? <> ? {entity}</> : ''}
+                      {entity ? ` - ${entity}` : ''}
                     </p>
 
                     {(item.metadata?.reason || item.metadata?.comments) && (

@@ -34,6 +34,8 @@ export function useApproveEcr() {
     mutationFn: (eventId) => approveEcr(eventId),
     onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({ queryKey: ['club-service', 'ecr', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events'] });
+      queryClient.invalidateQueries({ queryKey: ['club-service', 'events', 'detail', eventId] });
       toast.success('ECR approved.');
     },
     onError: (error) => {

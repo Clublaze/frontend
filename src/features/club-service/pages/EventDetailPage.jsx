@@ -1,15 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import Button from '@ds/components/Button';
 import Loader from '@ds/components/Loader';
 import EmptyState from '@ds/components/EmptyState';
 import PageHeader from '@ds/components/PageHeader';
 import StatusBadge from '@ds/components/StatusBadge';
 import { getApprovalHistory } from '@club/api/approvals.api';
 import { getEventById } from '@club/api/events.api';
+import BudgetApprovalPanel from '@club/components/BudgetApprovalPanel';
+import EcrApprovalPanel from '@club/components/EcrApprovalPanel';
+import SettlementApprovalPanel from '@club/components/SettlementApprovalPanel';
 import { useBudget, useSettlement } from '@club/hooks/useBudget';
 import { useEcr } from '@club/hooks/useEcr';
+import { useCloseEvent } from '@club/hooks/useEventActions';
+import { getRolesForUser } from '@club/api/roles.api';
+import { useIsAdmin, usePermission } from '@hooks/usePermission';
 import { formatDate } from '@dashboard/utils/dashboardFormatters';
 import { formatCanonicalRole } from '@dashboard/utils/dashboardAccess';
+import { selectUser } from '@store/authSlice';
 
 function TimelineStep({ item, index }) {
   return (
@@ -37,6 +46,9 @@ function TimelineStep({ item, index }) {
 
 function EventDetailPage() {
   const { eventId } = useParams();
+  const user = useSelector(selectUser);
+  const isAdmin = useIsAdmin();
+  const closeEvent = useCloseEvent();
   const eventQuery = useQuery({
     queryKey: ['club-service', 'events', 'detail', eventId],
     queryFn: () => getEventById(eventId),
@@ -50,15 +62,28 @@ function EventDetailPage() {
   const budgetQuery = useBudget(eventId);
   const ecrQuery = useEcr(eventId);
   const settlementQuery = useSettlement(eventId);
+  const rolesQuery = useQuery({
+    queryKey: ['club-service', 'roles', 'user', user?.id],
+    queryFn: () => getRolesForUser(user.id),
+    enabled: !!user?.id,
+  });
 
   const event = eventQuery.data;
+  const { can } = usePermission(rolesQuery.data ?? []);
   const approvalHistory = historyQuery.data ?? [];
+  const canApproveBudget = isAdmin || can('APPROVE_BUDGET');
+  const canApproveEcr = isAdmin || can('APPROVE_ECR');
+  const canApproveSettlement = isAdmin || can('APPROVE_BUDGET');
+  const canCloseEvent =
+    event?.status === 'ECR_PENDING' &&
+    String(user?.id ?? user?._id ?? '') === String(event?.createdBy?._id ?? event?.createdBy ?? '');
   const isLoading =
     eventQuery.isLoading ||
     historyQuery.isLoading ||
     budgetQuery.isLoading ||
     ecrQuery.isLoading ||
-    settlementQuery.isLoading;
+    settlementQuery.isLoading ||
+    rolesQuery.isLoading;
 
   if (isLoading) {
     return <div className="flex justify-center py-16"><Loader size="lg" /></div>;
@@ -73,6 +98,15 @@ function EventDetailPage() {
       <PageHeader
         title={event.title}
         description="Full event details, workflow progress, and post-event records."
+        action={canCloseEvent ? (
+          <Button
+            isLoading={closeEvent.isPending}
+            onClick={() => closeEvent.mutate(eventId)}
+            style={{ background: 'var(--color-success)', color: 'var(--color-text-on-brand)' }}
+          >
+            Close Event
+          </Button>
+        ) : null}
       />
 
       <section className="card-surface overflow-hidden">
@@ -120,6 +154,30 @@ function EventDetailPage() {
           </div>
         </div>
       </section>
+
+      {budgetQuery.data ? (
+        <BudgetApprovalPanel
+          budget={budgetQuery.data}
+          canApproveBudget={canApproveBudget}
+          eventId={eventId}
+        />
+      ) : null}
+
+      {ecrQuery.data ? (
+        <EcrApprovalPanel
+          canApproveEcr={canApproveEcr}
+          ecr={ecrQuery.data}
+          eventId={eventId}
+        />
+      ) : null}
+
+      {settlementQuery.data ? (
+        <SettlementApprovalPanel
+          canApproveSettlement={canApproveSettlement}
+          eventId={eventId}
+          settlement={settlementQuery.data}
+        />
+      ) : null}
 
       <section className="card-surface p-6">
         <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Approval Workflow Timeline</h2>

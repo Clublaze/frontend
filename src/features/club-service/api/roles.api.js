@@ -14,3 +14,8 @@ export async function assignRole(payload) {
   const response = await clubApi.post('/roles/assign', payload);
   return response.data.data;
 }
+
+export async function removeRole({ roleId }) {
+  const response = await clubApi.post('/roles/remove', { roleId });
+  return response.data.data;
+}
