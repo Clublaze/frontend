@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { clearAuth, setAuthLoading, setCredentials } from '@auth/authSlice';
+import { clearAuth, setAuthLoading, setCredentials } from '@store/authSlice';
+import { normalizeAuthUser } from '@auth/utils/normalizeAuthUser';
 import api from '@services/axios';
 
 export function useAuth() {
@@ -13,20 +14,24 @@ export function useAuth() {
     }
 
     hasInitialized.current = true;
-    console.log('useAuth running');
 
     async function initAuth() {
       dispatch(setAuthLoading(true));
 
       try {
-        const refreshResponse = await api.post('/auth/refresh');
+        const refreshResponse = await api.post('/api/auth/refresh');
         const accessToken = refreshResponse.data.data.accessToken;
-        const meResponse = await api.get('/auth/me');
+        const meResponse = await api.get('/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const user = normalizeAuthUser(meResponse.data.data);
 
         dispatch(
           setCredentials({
             accessToken,
-            user: meResponse.data.data,
+            user,
           }),
         );
       } catch {

@@ -1,4 +1,4 @@
-import { clearAuth } from '@auth/authSlice';
+import { clearAuth } from '@store/authSlice';
 import { store } from '@store/store';
 
 export function logout() {

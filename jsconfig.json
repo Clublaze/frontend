@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "@/*":         ["src/*"],
-      "@ds/*":       ["src/design-system/*"],
-      "@auth/*":     ["src/features/auth/*"],
-      "@club/*":     ["src/features/club-service/*"],
-      "@services/*": ["src/services/*"],
-      "@store/*":    ["src/store/*"],
-      "@hooks/*":    ["src/hooks/*"],
-      "@utils/*":    ["src/utils/*"],
-      "@config/*":   ["src/config/*"]
+      "@/*": ["./src/*"],
+      "@ds/*": ["./src/design-system/*"],
+      "@auth/*": ["./src/features/auth/*"],
+      "@club/*": ["./src/features/club-service/*"],
+      "@dashboard/*": ["./src/features/dashboard/*"],
+      "@services/*": ["./src/services/*"],
+      "@store/*": ["./src/store/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@config/*": ["./src/config/*"]
     }
   },
   "include": ["src"]

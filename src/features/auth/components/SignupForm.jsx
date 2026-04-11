@@ -1,4 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
@@ -37,6 +39,8 @@ const signupSchema = z
   });
 
 function SignupForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const signupMutation = useSignup();
   const {
     formState: { errors },
@@ -59,6 +63,23 @@ function SignupForm() {
     control,
     name: 'accountType',
   });
+  const password = useWatch({
+    control,
+    name: 'password',
+  });
+
+  const passwordStrength = useMemo(() => {
+    let score = 0;
+    if ((password ?? '').length >= 8) score += 1;
+    if (/[A-Z]/.test(password ?? '')) score += 1;
+    if (/[0-9]/.test(password ?? '')) score += 1;
+    if (/[^A-Za-z0-9]/.test(password ?? '')) score += 1;
+
+    if (score <= 1) return { label: 'Weak', width: '25%' };
+    if (score <= 2) return { label: 'Fair', width: '50%' };
+    if (score === 3) return { label: 'Good', width: '75%' };
+    return { label: 'Strong', width: '100%' };
+  }, [password]);
 
   return (
     <form
@@ -116,23 +137,58 @@ function SignupForm() {
       ) : null}
 
       <div className="grid gap-5 md:grid-cols-2">
-        <Input
-          autoComplete="new-password"
-          error={errors.password?.message}
-          label="Password"
-          placeholder="Create a strong password"
-          type="password"
-          {...register('password')}
-        />
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-[var(--color-text-primary)]">Password</span>
+          <div className="relative">
+            <input
+              autoComplete="new-password"
+              className="min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 pr-12 text-base text-[var(--color-text-primary)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-secondary)] focus:border-[var(--color-brand)] sm:text-sm"
+              placeholder="Create a strong password"
+              type={showPassword ? 'text' : 'password'}
+              {...register('password')}
+            />
+            <button
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
+              onClick={() => setShowPassword((current) => !current)}
+              type="button"
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+          <div className="space-y-2">
+            <div className="h-2 rounded-full bg-[var(--color-surface-soft)]">
+              <div
+                className="h-2 rounded-full bg-[var(--color-brand)] transition-all duration-200"
+                style={{ width: passwordStrength.width }}
+              />
+            </div>
+            <p className="text-xs text-[var(--color-text-secondary)]">Strength: {passwordStrength.label}</p>
+          </div>
+          {errors.password ? <p className="text-sm text-[var(--color-danger)]">{errors.password.message}</p> : null}
+        </label>
 
-        <Input
-          autoComplete="new-password"
-          error={errors.confirmPassword?.message}
-          label="Confirm Password"
-          placeholder="Repeat your password"
-          type="password"
-          {...register('confirmPassword')}
-        />
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-[var(--color-text-primary)]">Confirm Password</span>
+          <div className="relative">
+            <input
+              autoComplete="new-password"
+              className="min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 pr-12 text-base text-[var(--color-text-primary)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-secondary)] focus:border-[var(--color-brand)] sm:text-sm"
+              placeholder="Repeat your password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              {...register('confirmPassword')}
+            />
+            <button
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
+              onClick={() => setShowConfirmPassword((current) => !current)}
+              type="button"
+            >
+              {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+          {errors.confirmPassword ? <p className="text-sm text-[var(--color-danger)]">{errors.confirmPassword.message}</p> : null}
+        </label>
       </div>
 
       <Button className="w-full" isLoading={signupMutation.isPending} size="lg" type="submit">

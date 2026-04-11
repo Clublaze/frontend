@@ -9,10 +9,47 @@
   --color-text-primary: #eef2ff;
   --color-text-secondary: #8c98b3;
   --color-text-inverse: #0b1022;
+  --color-text-on-brand: #ffffff;
   --color-brand: #21c7b7;
   --color-brand-soft: #123a46;
   --color-success: #35d39a;
   --color-danger: #ff6b6b;
+  --color-overlay: rgba(5, 8, 15, 0.66);
+  --color-background-glow: rgba(33, 199, 183, 0.12);
+
+  --gradient-brand-mark: linear-gradient(135deg, #35b8ff 0%, #6a5cff 100%);
+  --gradient-sidebar: linear-gradient(180deg, #0a0e18 0%, #0b0f1a 100%);
+  --shadow-brand-mark: 0 16px 36px -24px rgba(53, 184, 255, 0.75);
+  --shadow-user-avatar: 0 18px 40px -24px rgba(53, 184, 255, 0.7);
+
+  --status-event-draft-bg: #1e293b;
+  --status-event-draft-text: #94a3b8;
+  --status-event-draft-border: #334155;
+  --status-event-review-bg: #422006;
+  --status-event-review-text: #f59e0b;
+  --status-event-review-border: #92400e;
+  --status-event-approved-bg: #052e16;
+  --status-event-approved-text: #22c55e;
+  --status-event-approved-border: #14532d;
+  --status-event-rejected-bg: #3b0000;
+  --status-event-rejected-text: #ef4444;
+  --status-event-rejected-border: #7f1d1d;
+  --status-event-ecr-bg: #0c1a3a;
+  --status-event-ecr-text: #60a5fa;
+  --status-event-ecr-border: #1e3a8a;
+  --status-event-closed-bg: #0f172a;
+  --status-event-closed-text: #475569;
+  --status-event-closed-border: #1e293b;
+
+  --status-approval-pending-bg: #422006;
+  --status-approval-pending-text: #f59e0b;
+  --status-approval-pending-border: #92400e;
+  --status-approval-approved-bg: #052e16;
+  --status-approval-approved-text: #22c55e;
+  --status-approval-approved-border: #14532d;
+  --status-approval-rejected-bg: #3b0000;
+  --status-approval-rejected-text: #ef4444;
+  --status-approval-rejected-border: #7f1d1d;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;

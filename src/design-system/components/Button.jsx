@@ -37,7 +37,7 @@ function Button({
       type={type}
       {...props}
     >
-      {isLoading ? <Loader color="currentColor" size="sm" /> : null}
+      {isLoading ? <Loader className="text-current" size="sm" /> : null}
       <span>{children}</span>
     </button>
   );

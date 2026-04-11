@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { jwtDecode } from 'jwt-decode';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getApiErrorMessage, login } from '@auth/api/auth.api';
-import { setCredentials } from '@auth/authSlice';
+import { getApiErrorMessage, getCurrentUser, login } from '@auth/api/auth.api';
+import { setCredentials } from '@store/authSlice';
+import { normalizeAuthUser } from '@auth/utils/normalizeAuthUser';
 
 export function useLogin() {
   const dispatch = useDispatch();
@@ -12,17 +12,14 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: login,
-    onSuccess: ({ accessToken }) => {
-      const decoded = jwtDecode(accessToken);
+    onSuccess: async ({ accessToken }) => {
+      const userResponse = await getCurrentUser(accessToken);
+      const user = normalizeAuthUser(userResponse);
 
       dispatch(
         setCredentials({
           accessToken,
-          user: {
-            id: decoded.sub,
-            userType: decoded.type,
-            universityId: decoded.universityId,
-          },
+          user,
         }),
       );
 

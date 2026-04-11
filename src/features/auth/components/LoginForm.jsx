@@ -1,4 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
@@ -12,6 +14,7 @@ const loginSchema = z.object({
 });
 
 function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const {
     formState: { errors },
@@ -35,14 +38,27 @@ function LoginForm() {
         {...register('email')}
       />
 
-      <Input
-        autoComplete="current-password"
-        error={errors.password?.message}
-        label="Password"
-        placeholder="Enter your password"
-        type="password"
-        {...register('password')}
-      />
+      <label className="block space-y-2">
+        <span className="text-sm font-medium text-[var(--color-text-primary)]">Password</span>
+        <div className="relative">
+          <input
+            autoComplete="current-password"
+            className="min-h-12 w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-4 py-3 pr-12 text-base text-[var(--color-text-primary)] outline-none transition-all duration-200 placeholder:text-[var(--color-text-secondary)] focus:border-[var(--color-brand)] sm:text-sm"
+            placeholder="Enter your password"
+            type={showPassword ? 'text' : 'password'}
+            {...register('password')}
+          />
+          <button
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
+            onClick={() => setShowPassword((current) => !current)}
+            type="button"
+          >
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+          </button>
+        </div>
+        {errors.password ? <p className="text-sm text-[var(--color-danger)]">{errors.password.message}</p> : null}
+      </label>
 
       <Button className="w-full" isLoading={loginMutation.isPending} size="lg" type="submit">
         Sign In

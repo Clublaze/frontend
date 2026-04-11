@@ -17,6 +17,7 @@ export default defineConfig({
       '@ds':       resolvePath('./src/design-system'),
       '@auth':     resolvePath('./src/features/auth'),
       '@club':     resolvePath('./src/features/club-service'),
+      '@dashboard':resolvePath('./src/features/dashboard'),
       '@services': resolvePath('./src/services'),
       '@store':    resolvePath('./src/store'),
       '@hooks':    resolvePath('./src/hooks'),
