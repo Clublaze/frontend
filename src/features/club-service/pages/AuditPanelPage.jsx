@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import { Navigate, useOutletContext } from 'react-router-dom';
+import {
+  CheckCircle,
+  Plus,
+  Search,
+  Send,
+  Users,
+  XCircle,
+} from 'lucide-react';
 import Loader from '@ds/components/Loader';
 import EmptyState from '@ds/components/EmptyState';
 import PageHeader from '@ds/components/PageHeader';
 import Button from '@ds/components/Button';
-import AuditEntry from '@club/components/AuditEntry';
 import { useAuditPanel } from '@club/hooks/useAuditPanel';
 import { useIsAdmin, usePermission } from '@hooks/usePermission';
+import {
+  formatDateTime,
+  formatStatusLabel,
+} from '@dashboard/utils/dashboardFormatters';
 
 const ACTION_FILTERS = [
   { label: 'All', value: null },
@@ -26,6 +37,7 @@ function AuditPanelPage() {
   const [activeFilter, setActiveFilter] = useState(null);
   const [page, setPage] = useState(1);
   const [allLogs, setAllLogs] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, isFetching } = useAuditPanel({ action: activeFilter, page });
 
@@ -47,34 +59,53 @@ function AuditPanelPage() {
   }
 
   const displayLogs = page === 1 ? (data?.logs ?? []) : [...allLogs, ...(data?.logs ?? [])];
+  const filteredLogs = displayLogs.filter((item) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (item.action ?? '').toLowerCase().includes(q) ||
+      (item.performedBy ?? '').toLowerCase().includes(q) ||
+      (item.performedByRole ?? '').toLowerCase().includes(q) ||
+      (item.metadata?.eventTitle ?? '').toLowerCase().includes(q)
+    );
+  });
   const hasMore = data ? page < data.totalPages : false;
 
   return (
     <div className="space-y-8">
       <PageHeader title="Audit Panel" description="Complete activity log of all platform actions." />
 
-      <div className="flex flex-wrap gap-2 overflow-x-auto pb-1">
-        {ACTION_FILTERS.map((filter) => (
-          <Button
-            key={filter.label}
-            className={[
-              'shrink-0 border px-3 py-1.5',
-              activeFilter === filter.value
-                ? 'border-[var(--color-brand)] bg-[var(--color-brand-soft)] text-[var(--color-brand)]'
-                : 'border-[var(--color-border)] bg-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
-            ].join(' ')}
-            onClick={() => handleFilterChange(filter.value)}
-            size="sm"
-            variant="ghost"
-          >
-            {filter.label}
-          </Button>
-        ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-secondary)]" />
+          <input
+            className="min-h-10 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] pl-9 pr-4 py-2 text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-secondary)] focus:border-[var(--color-brand)]"
+            placeholder="Search actions or people..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {ACTION_FILTERS.map((filter) => (
+            <button
+              key={filter.label}
+              type="button"
+              className="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors"
+              style={activeFilter === filter.value
+                ? { background: 'var(--color-brand-soft)', color: 'var(--color-brand)', borderColor: 'var(--color-brand)' }
+                : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)', borderColor: 'var(--color-border)' }
+              }
+              onClick={() => handleFilterChange(filter.value)}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {isLoading && page === 1 ? (
         <div className="flex justify-center py-12"><Loader size="lg" /></div>
-      ) : displayLogs.length === 0 ? (
+      ) : filteredLogs.length === 0 ? (
         <EmptyState
           icon="audit"
           title="No audit records"
@@ -82,24 +113,84 @@ function AuditPanelPage() {
         />
       ) : (
         <div className="card-surface p-5">
-          <div className="space-y-0">
-            {displayLogs.map((item) => (
-              <AuditEntry key={item._id} item={item} />
-            ))}
+          <div>
+            {filteredLogs.map((item, idx) => {
+              const isApproved = item.action?.includes('APPROVED');
+              const isRejected = item.action?.includes('REJECTED');
+              const isSubmitted = item.action?.includes('SUBMITTED');
+              const isCreated = item.action?.includes('CREATED');
+              const isMember = item.action?.includes('MEMBER') || item.action?.includes('MEMBERSHIP');
+
+              const dotColor = isApproved ? 'var(--color-success)'
+                : isRejected ? 'var(--color-danger)'
+                : 'var(--color-brand)';
+
+              const ActionIcon = isApproved ? CheckCircle
+                : isRejected ? XCircle
+                : isSubmitted ? Send
+                : isCreated || isMember ? Plus
+                : Users;
+
+              const actor = item.performedByRole
+                ? `${item.performedBy} (${item.performedByRole})`
+                : item.performedBy || 'System';
+
+              const entity = item.metadata?.eventTitle || item.entityType || '';
+
+              return (
+                <div key={item._id} className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <span
+                      className="mt-1 h-3 w-3 shrink-0 rounded-full"
+                      style={{ background: dotColor }}
+                    />
+                    {idx < filteredLogs.length - 1 && (
+                      <span className="w-px flex-1 bg-[var(--color-border)]" />
+                    )}
+                  </div>
+
+                  <article className="pb-6 flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <ActionIcon
+                          className="h-4 w-4 shrink-0"
+                          style={{ color: dotColor }}
+                        />
+                        <p
+                          className="text-base font-semibold"
+                          style={{ color: dotColor }}
+                        >
+                          {formatStatusLabel(item.action)}
+                        </p>
+                      </div>
+                      <span className="shrink-0 whitespace-nowrap text-xs text-[var(--color-text-secondary)]">
+                        {formatDateTime(item.timestamp)}
+                      </span>
+                    </div>
+
+                    <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+                      <strong className="font-medium text-[var(--color-text-primary)]">{actor}</strong>
+                      {entity ? <> ? {entity}</> : ''}
+                    </p>
+
+                    {(item.metadata?.reason || item.metadata?.comments) && (
+                      <p className="mt-1 text-sm italic text-[var(--color-text-secondary)]">
+                        {item.metadata.reason || item.metadata.comments}
+                      </p>
+                    )}
+                  </article>
+                </div>
+              );
+            })}
           </div>
 
-          {hasMore ? (
+          {hasMore && (
             <div className="mt-4 flex justify-center">
-              <Button
-                disabled={isFetching}
-                onClick={handleLoadMore}
-                size="sm"
-                variant="ghost"
-              >
+              <Button disabled={isFetching} onClick={handleLoadMore} size="sm" variant="ghost">
                 {isFetching ? 'Loading...' : 'Load more'}
               </Button>
             </div>
-          ) : null}
+          )}
         </div>
       )}
     </div>

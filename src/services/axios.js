@@ -4,7 +4,7 @@ import { normalizeAuthUser } from '@auth/utils/normalizeAuthUser';
 import { logout } from '@auth/logout';
 import { store } from '@store/store';
 
-const AUTH_BASE_URL = import.meta.env.VITE_AUTH_BASE_URL;
+const AUTH_BASE_URL = import.meta.env.VITE_AUTH_BASE_URL || 'http://localhost:8001';
 const CLUB_SERVICE_BASE_URL =
   import.meta.env.VITE_CLUB_SERVICE_BASE_URL ||
   import.meta.env.VITE_API_BASE_URL ||

@@ -8,6 +8,7 @@ import Avatar from '@ds/components/Avatar';
 import StatusBadge from '@ds/components/StatusBadge';
 import Modal from '@ds/components/Modal';
 import Button from '@ds/components/Button';
+import SectionLabel from '@ds/components/SectionLabel';
 import { useMemberships } from '@club/hooks/useMemberships';
 import { useLeaveClub } from '@club/hooks/useLeaveClub';
 import {
@@ -175,60 +176,89 @@ function MembershipsPage() {
         />
       ) : (
         <>
-          <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-            My Clubs
-          </p>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <SectionLabel>My Clubs</SectionLabel>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {memberships.map((membership) => {
               const clubName = getClubName(membership.clubId);
               const societyName = getSocietyName(membership.clubId);
               const schoolName = getSchoolName(membership.clubId);
 
+              const badgeConfig = {
+                ACTIVE: {
+                  bg: 'var(--status-event-approved-bg)',
+                  text: 'var(--status-event-approved-text)',
+                  border: 'var(--status-event-approved-border)',
+                  label: 'Active Member',
+                },
+                PENDING: {
+                  bg: 'var(--status-approval-pending-bg)',
+                  text: 'var(--status-approval-pending-text)',
+                  border: 'var(--status-approval-pending-border)',
+                  label: 'Pending',
+                },
+                REJECTED: {
+                  bg: 'var(--status-event-rejected-bg)',
+                  text: 'var(--status-event-rejected-text)',
+                  border: 'var(--status-event-rejected-border)',
+                  label: 'Rejected',
+                },
+              }[membership.status] ?? {
+                bg: 'var(--color-surface-soft)',
+                text: 'var(--color-text-secondary)',
+                border: 'var(--color-border)',
+                label: membership.status,
+              };
+
               return (
-                <article key={membership._id} className="card-surface p-5">
-                  <div className="flex items-start gap-4">
+                <article key={membership._id} className="card-surface flex flex-col gap-4 p-5">
+                  <div className="flex items-center gap-3">
                     <Avatar name={clubName} size="lg" />
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-semibold text-[var(--color-text-primary)]">
-                        {clubName}
-                      </h3>
-                      {societyName ? (
-                        <p className="mt-0.5 text-sm text-[var(--color-text-secondary)]">
-                          Society: {societyName}
-                        </p>
-                      ) : null}
-                      {schoolName ? (
-                        <p className="text-sm text-[var(--color-text-secondary)]">
-                          School: {schoolName}
-                        </p>
-                      ) : null}
-                    </div>
+                    <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                      {clubName}
+                    </h3>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between gap-4">
-                    <StatusBadge status={membership.status} type="event" />
-                    {membership.status === 'ACTIVE' ? (
-                      <Button
-                        className="h-auto px-0 py-0 text-[var(--color-danger)] hover:bg-transparent hover:underline"
+                  {(societyName || schoolName) && (
+                    <div
+                      className="space-y-0.5 border-l-2 pl-3"
+                      style={{ borderColor: 'var(--color-brand)' }}
+                    >
+                      {societyName && (
+                        <p className="text-sm font-medium" style={{ color: 'var(--color-brand)' }}>
+                          {societyName}
+                        </p>
+                      )}
+                      {schoolName && (
+                        <p className="text-sm text-[var(--color-text-secondary)]">{schoolName}</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold"
+                      style={{ background: badgeConfig.bg, color: badgeConfig.text, borderColor: badgeConfig.border }}
+                    >
+                      {badgeConfig.label}
+                    </span>
+
+                    {membership.status === 'ACTIVE' && (
+                      <button
+                        type="button"
+                        className="text-sm hover:underline"
+                        style={{ color: 'var(--color-danger)' }}
                         onClick={() => setConfirmLeave({ clubId: membership.clubId, clubName })}
-                        size="sm"
-                        variant="ghost"
                       >
                         Leave Club
-                      </Button>
-                    ) : null}
+                      </button>
+                    )}
                   </div>
 
-                  {membership.status === 'PENDING' ? (
-                    <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
-                      Application under review
-                    </p>
-                  ) : null}
-                  {membership.status === 'REJECTED' && membership.rejectionReason ? (
-                    <p className="mt-2 text-xs text-[var(--color-danger)]">
+                  {membership.status === 'REJECTED' && membership.rejectionReason && (
+                    <p className="text-sm italic" style={{ color: 'var(--color-danger)' }}>
                       Reason: {membership.rejectionReason}
                     </p>
-                  ) : null}
+                  )}
                 </article>
               );
             })}

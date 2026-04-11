@@ -4,7 +4,7 @@ import Loader from '@ds/components/Loader';
 import EmptyState from '@ds/components/EmptyState';
 import PageHeader from '@ds/components/PageHeader';
 import ClubCard from '@club/components/ClubCard';
-import { useDiscoveryClubs } from '@club/hooks/useDiscovery';
+import { useDiscoveryClubs, useOrganizationTree } from '@club/hooks/useDiscovery';
 import { useMemberships } from '@club/hooks/useMemberships';
 import { useJoinClub } from '@club/hooks/useJoinClub';
 
@@ -13,6 +13,7 @@ function ClubsPage() {
 
   const [search, setSearch] = useState('');
   const clubsQuery = useDiscoveryClubs(50);
+  const orgTree = useOrganizationTree();
   const membershipsQuery = useMemberships();
   const joinClub = useJoinClub();
 
@@ -58,6 +59,7 @@ function ClubsPage() {
               membershipStatus={getMembershipStatus(club._id)}
               onJoin={(id) => joinClub.mutate({ clubId: id })}
               isJoining={joinClub.isPending}
+              orgTree={orgTree.data}
             />
           ))}
         </div>

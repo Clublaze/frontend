@@ -3,46 +3,31 @@ import { useSelector } from 'react-redux';
 import Loader from '@ds/components/Loader';
 import DashboardCard from '@dashboard/components/DashboardCard';
 import DashboardHeader from '@dashboard/components/DashboardHeader';
-import RoleDashboardContent from '@dashboard/components/RoleDashboardContent';
 import { selectUser } from '@store/authSlice';
+import { usePermission, useIsAdmin } from '@hooks/usePermission';
+import StudentDashboard from '@dashboard/sections/StudentDashboard';
+import ApproverDashboard from '@dashboard/sections/ApproverDashboard';
+import ClubLeadDashboard from '@dashboard/sections/ClubLeadDashboard';
+import AdminDashboard from '@dashboard/sections/AdminDashboard';
 
 const ADMIN_TYPES = ['UNIVERSITY_ADMIN', 'ADMIN', 'SUPER_ADMIN'];
 const ROLE_PRIORITY = [
-  'DEAN',
-  'HOD',
-  'FACULTY_ADVISOR',
-  'PRESIDENT',
-  'VICE_PRESIDENT',
-  'SECRETARY',
-  'CLUB_LEAD',
-  'CO_LEAD',
-  'COORDINATOR',
+  'DEAN', 'HOD', 'FACULTY_ADVISOR', 'PRESIDENT', 'VICE_PRESIDENT',
+  'SECRETARY', 'CLUB_LEAD', 'CO_LEAD', 'COORDINATOR',
 ];
 
 function getDashboardRole(user, roles = []) {
-  if (ADMIN_TYPES.includes(user?.userType)) {
-    return 'ADMIN';
-  }
-
-  const activeRoles = roles
-    .filter((role) => role.status !== 'REMOVED')
-    .map((role) => role.canonicalRole);
-  const matchedRole = ROLE_PRIORITY.find((role) => activeRoles.includes(role));
-
-  if (matchedRole) {
-    return matchedRole;
-  }
-
-  if (user?.userType === 'FACULTY') {
-    return 'FACULTY';
-  }
-
-  return 'STUDENT';
+  if (ADMIN_TYPES.includes(user?.userType)) return 'ADMIN';
+  const active = roles.filter((role) => role.status !== 'REMOVED').map((role) => role.canonicalRole);
+  return ROLE_PRIORITY.find((role) => active.includes(role))
+    || (user?.userType === 'FACULTY' ? 'FACULTY' : 'STUDENT');
 }
 
 function DashboardPage() {
   const dashboard = useOutletContext() ?? {};
   const user = useSelector(selectUser);
+  const isAdmin = useIsAdmin();
+  const { can } = usePermission(dashboard.roles ?? []);
   const dashboardRole = getDashboardRole(user, dashboard.roles);
 
   if (dashboard.isLoading) {
@@ -57,8 +42,7 @@ function DashboardPage() {
     return (
       <DashboardCard className="max-w-2xl" icon="help" title="Dashboard unavailable">
         <p className="text-sm leading-6 text-[var(--color-text-secondary)]">
-          Could not load dashboard data. Verify that club-service is running
-          and the API base URL is correct in your .env file.
+          Could not load dashboard data. Check that club-service is running.
         </p>
       </DashboardCard>
     );
@@ -71,7 +55,10 @@ function DashboardPage() {
         roles={dashboard.roles ?? []}
         user={user}
       />
-      <RoleDashboardContent dashboard={dashboard} role={dashboardRole} />
+      {isAdmin && <AdminDashboard dashboard={dashboard} />}
+      {!isAdmin && can('APPROVE_STEP') && <ApproverDashboard dashboard={dashboard} />}
+      {!isAdmin && !can('APPROVE_STEP') && can('MANAGE_MEMBERS') && <ClubLeadDashboard dashboard={dashboard} />}
+      {!isAdmin && !can('APPROVE_STEP') && !can('MANAGE_MEMBERS') && <StudentDashboard dashboard={dashboard} />}
     </div>
   );
 }
