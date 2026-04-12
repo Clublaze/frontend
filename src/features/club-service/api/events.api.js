@@ -6,6 +6,15 @@ export async function getEvents(params = {}) {
   return Array.isArray(result) ? result : (result?.data ?? []);
 }
 
+export async function getEventsByDateRange({ from, to } = {}) {
+  const params = {};
+  if (from) params.from = from;
+  if (to) params.to = to;
+  const response = await clubApi.get('/events', { params });
+  const result = response.data.data;
+  return Array.isArray(result) ? result : (result?.data ?? []);
+}
+
 export async function getEventById(eventId) {
   const response = await clubApi.get(`/events/${eventId}`);
   return response.data.data;

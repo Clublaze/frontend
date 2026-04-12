@@ -28,6 +28,7 @@ import {
   getUserDisplayName,
   getUserInitials,
 } from '@dashboard/utils/userPresentation';
+import CalendarPanel from '@/layouts/components/CalendarPanel';
 
 const iconMap = {
   approvals: ClipboardCheck,
@@ -205,6 +206,19 @@ function SidebarShell({
             title="Account"
           />
         </div>
+        {!collapsed && (
+          <div className="mt-4 border-t border-[var(--color-border)] pt-3">
+            <p
+              className="mb-2 px-4 text-[0.72rem] font-semibold uppercase tracking-[0.24em]"
+              style={{
+                color: 'color-mix(in srgb, var(--color-text-secondary) 88%, var(--color-text-primary) 12%)',
+              }}
+            >
+              Calendar
+            </p>
+            <CalendarPanel />
+          </div>
+        )}
       </div>
 
       <div className={collapsed ? 'px-2 pb-3 pt-2' : 'p-4'}>
